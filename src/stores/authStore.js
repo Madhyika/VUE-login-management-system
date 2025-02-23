@@ -13,7 +13,7 @@ export const useAuthStore = defineStore("auth", {
       try {
         const response = await api.post("/auth/login", { username, password });
         this.token = response.data.token;
-        localStorage.setItem("token", this.token); // Store token in localStorage
+        localStorage.setItem("token", this.token); 
       } catch (error) {
         console.error("Login failed:", error.response.data);
       }
