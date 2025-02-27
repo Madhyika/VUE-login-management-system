@@ -80,52 +80,41 @@
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/authstore";
 import { computed, onMounted, ref } from "vue";
+import { useTaskStore } from "../stores/taskStore";
 
 export default {
   setup() {
     const authStore = useAuthStore();
     const router = useRouter();
-    const newUsername = ref("");
-    const newPassword = ref("");
-    const tasks = ref([]);
+    const taskStore = useTaskStore();
     const newTask = ref({ title: "", description: "" });
-    const openProfile = () => {
-      router.push("/profile"); // Opens profile page
-    };
+    const loading = ref(false);
+    const tasks = computed(() => taskStore.tasks); 
     const loggedInUser = computed(() => authStore.loggedInUser);
 
-    onMounted(() => {
+    onMounted(async() => {
       if (!loggedInUser.value) {
         router.push("/login");
         return;
       }
-      tasks.value =
-        JSON.parse(localStorage.getItem(loggedInUser.value.username)) || [];
+      await useTaskStore.fetchTasks();
     });
 
-    const submitTask = () => {
-      tasks.value.push({ ...newTask.value, done: false });
-      saveTasks();
+    const submitTask = async () => {
+      if (!newTask.value.title || !newTask.value.description) return;
+
+      loading.value = true;
+      await taskStore.createTask(newTask.value.title, newTask.value.description);
       newTask.value = { title: "", description: "" };
+      loading.value = false;
     };
 
-    const toggleDone = (index) => {
-      tasks.value[index].done = !tasks.value[index].done;
-      saveTasks();
+    const toggleDone = async (task) => {
+      await taskStore.updateTask(task._id, task.title, task.description, !task.done);
     };
 
-    const deleteTask = (index) => {
-      tasks.value.splice(index, 1);
-      saveTasks();
-    };
-
-    const saveTasks = () => {
-      if (loggedInUser.value) {
-        localStorage.setItem(
-          loggedInUser.value.username,
-          JSON.stringify(tasks.value)
-        );
-      }
+    const deleteTask = async (id) => {
+      await taskStore.deleteTask(id);
     };
 
     const logout = () => {
@@ -133,29 +122,21 @@ export default {
       router.push("/login");
     };
 
-    const changeProfile = () => {
-      if (authStore.updateProfile(newUsername.value, newPassword.value)) {
-        alert("Profile updated successfully!");
-        authStore.logout();
-        router.push("/login");
-      } else {
-        alert(authStore.error);
-      }
+    const openProfile = () => {
+      router.push("/profile");
     };
 
     return {
-      loggedInUser,
-      newUsername,
-      newPassword,
-      tasks,
       newTask,
       submitTask,
       toggleDone,
       deleteTask,
       logout,
-      changeProfile,
       openProfile,
-    };
-  },
-};
+      tasks,
+      taskStore,
+      loading,
+    }; 
+   },
+  };
 </script>

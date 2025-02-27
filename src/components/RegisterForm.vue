@@ -80,16 +80,31 @@ export default {
     const email = ref("");
     const password = ref("");
     const error = ref(null);
+    const loading = ref(false);
 
-    const register = () => {
-      if (authStore.register(username.value, email.value, password.value)) {
-        router.push("/login");
-      } else {
-        error.value = authStore.error;
+    const register = async () => {
+      error.value = null;
+      loading.value = true;
+
+      try {
+        const success = await authStore.register(
+          username.value,
+          email.value,
+          password.value
+        );
+        if (success) {
+          router.push("/login");
+        } else {
+          error.value = authStore.error || "Registration failed.";
+        }
+      } catch (err) {
+        error.value = "An unexpected error occurred.";
+      } finally {
+        loading.value = false;
       }
     };
 
-    return { username, email, password, error, register };
+    return { username, email, password, error, register, loading };
   },
 };
 </script>

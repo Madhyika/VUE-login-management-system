@@ -6,6 +6,7 @@ export const useTaskStore = defineStore("task", {
     tasks: [],
     error: null,
   }),
+
   actions: {
     async fetchTasks() {
       try {
@@ -19,16 +20,16 @@ export const useTaskStore = defineStore("task", {
     async createTask(title, description) {
       try {
         await api.post("/tasks/create", { title, description });
-        this.fetchTasks(); 
+        await this.fetchTasks(); // Refresh task list
       } catch (error) {
         this.error = "Failed to create task";
       }
     },
 
-    async updateTask(id, title, description) {
+    async updateTask(id, title, description, done) {
       try {
-        await api.put(`/tasks/${id}`, { title, description });
-        this.fetchTasks();
+        await api.put(`/tasks/${id}`, { title, description, done });
+        await this.fetchTasks(); // Refresh task list
       } catch (error) {
         this.error = "Failed to update task";
       }
@@ -37,7 +38,7 @@ export const useTaskStore = defineStore("task", {
     async deleteTask(id) {
       try {
         await api.delete(`/tasks/${id}`);
-        this.fetchTasks();
+        await this.fetchTasks(); // Refresh task list
       } catch (error) {
         this.error = "Failed to delete task";
       }

@@ -67,14 +67,26 @@ export default {
     const userInput = ref("");
     const password = ref("");
     const error = ref(null);
+    const loading = ref(false);
 
-    const login = () => {
-      if (authStore.login(userInput.value, password.value)) {
-        router.push("/tasks");
-      }else {
-        error.value = authStore.error;
+    const login = async () => {
+      error.value = null;
+      loading.value = true;
+
+      try {
+        const success = await authStore.login(userInput.value, password.value);
+        if (success) {
+          router.push("/tasks");
+        } else {
+          error.value = authStore.error || "Login failed. Please try again.";
+        }
+      } catch (error) {
+        error.value = "An unexpected error occurred.";
+      } finally {
+        loading.value = false;
       }
     };
+
     return { userInput, password, error, authStore, login };
   },
 };
