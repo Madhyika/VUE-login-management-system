@@ -58,12 +58,12 @@
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/authstore";
 import { ref } from "vue";
+import axios from "axios";
 
 export default {
   setup() {
     const authStore = useAuthStore();
     const router = useRouter();
-    
     const userInput = ref("");
     const password = ref("");
     const error = ref(null);
@@ -74,20 +74,26 @@ export default {
       loading.value = true;
 
       try {
-        const success = await authStore.login(userInput.value, password.value);
-        if (success) {
-          router.push("/tasks");
-        } else {
-          error.value = authStore.error || "Login failed. Please try again.";
-        }
+        const response = await axios.post(
+          "http://localhost:8000/api/auth/login",
+          { email: userInput.value, password: password.value },
+          { withCredentials: true }
+        );
+        console.log("Login Success:", response.data);
+
+        authStore.setUser(response.data.user);
+        authStore.setToken(response.data.token);
+
+        router.push("/tasks");
       } catch (error) {
-        error.value = "An unexpected error occurred.";
+        console.error("Login Failed:", err.response ? err.response.data : error);
+        error.value = error.response?.data?.message || "Login failed. Please try again.";
       } finally {
         loading.value = false;
       }
     };
 
-    return { userInput, password, error, authStore, login };
+    return { userInput, password, error, login };
   },
 };
 </script>
