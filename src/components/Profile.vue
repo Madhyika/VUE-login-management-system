@@ -3,7 +3,7 @@
     <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
       <h2 class="text-xl font-bold text-center mb-4">Update Password</h2>
 
-      <form @submit.prevent="updatePassword">
+      <form @submit.prevent="handleUpdatePassword">
         <div class="mb-4">
           <label class="block text-sm text-gray-700">New Password:</label>
           <input
@@ -36,8 +36,9 @@
         <button
           type="submit"
           class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700"
+          :disabled="loading"
         >
-          Update Password
+          {{ loading ? "Updating..." : "Update Password" }}
         </button>
       </form>
 
@@ -48,71 +49,57 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { useRouter } from "vue-router";
-import { useAuthStore } from "../stores/authstore";
-import { ref, onMounted } from "vue";
+import { useAuthStore } from "../stores/authStore";
+import { ref, computed, onMounted } from "vue";
 
-export default {
-  setup() {
-    const authStore = useAuthStore();
-    const router = useRouter();
-    const newPassword = ref("");
-    const confirmPassword = ref("");
-    const errorMessage = ref("");
-    const successMessage = ref("");
-    const loading = ref(false);
+const authStore = useAuthStore();
+const router = useRouter();
+const newPassword = ref("");
+const confirmPassword = ref("");
+const errorMessage = ref("");
+const successMessage = ref("");
+const loading = ref(false);
 
-    onMounted(() => {
-      if (!authStore.loggedInUser) {
-        router.push("/TaskManager");
-      }
-    });
+onMounted(() => {
+  if (!authStore.loggedInUser) {
+    router.push("/TaskManager");
+  }
+});
 
-    const updatePassword = async () => {
-      errorMessage.value = "";
-      successMessage.value = "";
-      loading.value = true;
+const handleUpdatePassword = async () => {
+  errorMessage.value = "";
+  successMessage.value = "";
+  loading.value = true;
 
-      if (newPassword.value.length < 6) {
-        errorMessage.value = "Password must be at least 6 characters long.";
-        loading.value = false;
-        return;
-      }
+  if (newPassword.value.length < 6) {
+    errorMessage.value = "Password must be at least 6 characters long.";
+    loading.value = false;
+    return;
+  }
 
-      if (newPassword.value !== confirmPassword.value) {
-        errorMessage.value = "Passwords do not match!";
-        loading.value = false;
-        return;
-      }
+  if (newPassword.value !== confirmPassword.value) {
+    errorMessage.value = "Passwords do not match!";
+    loading.value = false;
+    return;
+  }
 
-      try {
-        const success = await authStore.updatePassword(newPassword.value);
-        if (success) {
-          successMessage.value = "Password updated successfully!";
-        } else {
-          errorMessage.value = authStore.error || "Failed to update password.";
-        }
-      } catch (error) {
-        errorMessage.value = "An unexpected error occurred.";
-      } finally {
-        loading.value = false;
-      }
-    };
+  try {
+    const success = await authStore.updatePassword(newPassword.value);
+    if (success) {
+      successMessage.value = "Password updated successfully!";
+    } else {
+      errorMessage.value = authStore.error || "Failed to update password.";
+    }
+  } catch (error) {
+    errorMessage.value = "An unexpected error occurred.";
+  } finally {
+    loading.value = false;
+  }
+};
 
-    const goBack = () => {
-      router.push("/tasks");
-    };
-
-    return {
-      newPassword,
-      confirmPassword,
-      updatePassword,
-      goBack,
-      errorMessage,
-      successMessage,
-      loading,
-    };
-  },
+const goBack = () => {
+  router.push("/tasks");
 };
 </script>
