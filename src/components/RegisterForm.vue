@@ -6,13 +6,13 @@
       </h2>
       <form @submit.prevent="handleRegister">
         <div class="mb-4">
-          <label for="username" class="block text-sm text-gray-700 mb-1"
+          <label for="name" class="block text-sm text-gray-700 mb-1"
             >Username:</label
           >
           <input
-            v-model.trim="username"
+            v-model.trim="name"
             type="text"
-            id="username"
+            id="name"
             placeholder="Enter your username"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             required
@@ -79,7 +79,7 @@ import { ref } from "vue";
 
 const authStore = useAuthStore();
 const router = useRouter();
-const username = ref("");
+const name = ref("");
 const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
@@ -89,7 +89,7 @@ const handleRegister = async () => {
   errorMessage.value = "";
   loading.value = true;
 
-  if (!username.value || !email.value || !password.value) {
+  if (!name.value || !email.value || !password.value) {
     errorMessage.value = "All fields are required.";
     loading.value = false;
     return;
@@ -97,7 +97,7 @@ const handleRegister = async () => {
 
   try {
     const success = await authStore.register(
-      username.value,
+      name.value,
       email.value,
       password.value
     );

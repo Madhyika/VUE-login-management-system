@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 import api from "../api/api";
+import axios from "axios";
+
+axios.defaults.baseURL = "http://127.0.0.1:8000";
+axios.defaults.withCredentials = true;
 
 export const useAuthStore = defineStore("auth", () => {
   const token = ref(localStorage.getItem("token") || null);
@@ -26,9 +30,11 @@ export const useAuthStore = defineStore("auth", () => {
   });
 
   // Actions
-  const login = async (username, password) => {
+  const login = async (login, password) => {
     try {
-      const response = await api.post("/auth/login", { username, password });
+      await axios.get("/sanctum/csrf-cookie");
+
+      const response = await api.post("/login", { login, password });
 
       if (response.data.token) {
         token.value = response.data.token;
@@ -45,10 +51,12 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
-  const register = async (username, email, password) => {
+  const register = async (name, email, password) => {
     try {
-      const response = await api.post("/auth/register", {
-        username,
+      await axios.get("/sanctum/csrf-cookie");
+
+      const response = await api.post("/register", {
+        name,
         email,
         password,
       });

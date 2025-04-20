@@ -6,13 +6,13 @@
       </h2>
       <form @submit.prevent="handleLogin">
         <div class="mb-4">
-          <label for="userInput" class="block text-sm text-gray-700 mb-1">
+          <label for="login" class="block text-sm text-gray-700 mb-1">
             Username/Email:
           </label>
           <input
-            v-model="userInput"
+            v-model="login"
             type="text"
-            id="userInput"
+            id="login"
             placeholder="Enter username or email"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             required
@@ -61,7 +61,7 @@ import { ref } from "vue";
 
 const authStore = useAuthStore();
 const router = useRouter();
-const userInput = ref("");
+const login = ref("");
 const password = ref("");
 const error = ref(null);
 const loading = ref(false);
@@ -70,7 +70,7 @@ const handleLogin = async () => {
   error.value = null;
   loading.value = true;
 
-  const success = await authStore.login(userInput.value, password.value);
+  const success = await authStore.login(login.value, password.value);
   if (success) {
     router.push("/tasks");
   } else {
