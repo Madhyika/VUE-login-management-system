@@ -29,19 +29,19 @@
 
     <div class="space-y-6 mt-10 w-full max-w-lg">
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <form @submit.prevent="submitTask" class="space-y-4">
+        <form @submit.prevent="submitNote" class="space-y-4">
           <div class="border-2 border-gray-300 rounded-lg p-2 w-full">
             <input
-              v-model="newTask.title"
-              placeholder="Task Title"
+              v-model="newNote.title"
+              placeholder="Note Title"
               class="w-full outline-none"
               required
             />
           </div>
           <div class="border-2 border-gray-300 rounded-lg p-2 w-full">
             <input
-              v-model="newTask.content"
-              placeholder="Task Description"
+              v-model="newNote.content"
+              placeholder="Note Description"
               class="w-full outline-none"
               required
             />
@@ -51,9 +51,10 @@
             :disabled="loading"
             class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            {{ loading ? "Saving..." : isEditing ? "Update Task" : "Add Task" }}
+            {{ loading ? "Saving..." : isEditing ? "Update Note" : "Add Note" }}
           </button>
 
+          <!-- Cancel Edit Button -->
           <button
             v-if="isEditing"
             type="button"
@@ -66,28 +67,22 @@
 
         <ul class="mt-4 space-y-2">
           <li
-            v-for="(task, index) in tasks"
+            v-for="(note, index) in notes"
             :key="index"
             class="flex justify-between items-center p-3 border-b border-gray-200"
           >
-            <span :class="{ 'line-through text-gray-500': task.done }">
-              {{ task.title }} - {{ task.content }}
+            <span :class="{ 'line-through text-gray-500': note.done }">
+              {{ note.title }} - {{ note.content }}
             </span>
             <div class="space-x-2">
               <button
-                @click="editTask(task)"
+                @click="editNote(note)"
                 class="text-blue-600 hover:underline"
               >
                 Edit
               </button>
               <button
-                @click="updateTask(task)"
-                class="text-green-600 hover:underline"
-              >
-                {{ task.done ? "Undo" : "Done" }}
-              </button>
-              <button
-                @click="deleteTask(task.id || task._id)"
+                @click="deleteNote(note.id || note._id)"
                 class="text-red-600 hover:underline"
               >
                 Delete
@@ -102,20 +97,20 @@
 
 <script setup>
 import { useRouter } from "vue-router";
-import { useAuthStore } from "../stores/authStore";
 import { computed, onMounted, ref } from "vue";
-import { useTaskStore } from "../stores/taskStore";
+import { useAuthStore } from "../stores/authStore";
+import { useNoteStore } from "../stores/noteStore";
 
-const authStore = useAuthStore();
 const router = useRouter();
-const taskStore = useTaskStore();
+const authStore = useAuthStore();
+const noteStore = useNoteStore();
 
-const newTask = ref({ title: "", content: "" });
-const editTaskId = ref(null);
+const newNote = ref({ title: "", content: "" });
+const editNoteId = ref(null);
 const isEditing = ref(false);
 const loading = ref(false);
 
-const tasks = computed(() => taskStore.tasks);
+const notes = computed(() => noteStore.notes);
 const loggedInUser = computed(() => authStore.loggedInUser);
 
 onMounted(async () => {
@@ -123,75 +118,64 @@ onMounted(async () => {
     router.push("/login");
     return;
   }
-  await taskStore.fetchTasks();
+  await noteStore.fetchNotes();
 });
 
-const submitTask = async () => {
-  if (!newTask.value.title || !newTask.value.content) return;
+const submitNote = async () => {
+  if (!newNote.value.title || !newNote.value.content) return;
 
   loading.value = true;
   try {
-    if (isEditing.value && editTaskId.value) {
-      await taskStore.updateTask(
-        editTaskId.value,
-        newTask.value.title,
-        newTask.value.content,
+    if (isEditing.value && editNoteId.value) {
+      await noteStore.updateNote(
+        editNoteId.value,
+        newNote.value.title,
+        newNote.value.content,
         false
       );
     } else {
-      await taskStore.createTask(newTask.value.title, newTask.value.content);
+      await noteStore.createNote(newNote.value.title, newNote.value.content);
     }
 
-    newTask.value = { title: "", content: "" };
-    editTaskId.value = null;
+    // Reset after submission
+    newNote.value = { title: "", content: "" };
+    editNoteId.value = null;
     isEditing.value = false;
   } catch (error) {
-    console.error("Error saving task:", error);
+    console.error("Error submitting note:", error);
   } finally {
     loading.value = false;
   }
 };
 
-const editTask = (task) => {
-  newTask.value.title = task.title;
-  newTask.value.content = task.content;
-  editTaskId.value = task.id || task._id;
+const editNote = (note) => {
+  newNote.value.title = note.title;
+  newNote.value.content = note.content;
+  editNoteId.value = note.id || note._id;
   isEditing.value = true;
 };
 
 const cancelEdit = () => {
-  newTask.value = { title: "", content: "" };
-  editTaskId.value = null;
+  newNote.value = { title: "", content: "" };
+  editNoteId.value = null;
   isEditing.value = false;
 };
 
-const updateTask = async (task) => {
-  const taskId = task.id || task._id;
-  if (!taskId) {
-    console.error("Missing task ID!", task);
-    return;
-  }
+const deleteNote = async (id) => {
   try {
-    await taskStore.updateTask(task.id, task.title, task.content, !task.done);
+    await noteStore.deleteNote(id);
   } catch (error) {
-    console.error("Error updating task:", error);
+    console.error("Error deleting note:", error);
   }
 };
 
-const deleteTask = async (id) => {
-  try {
-    await taskStore.deleteTask(id);
-  } catch (error) {
-    console.error("Error deleting task:", error);
-  }
-};
-
-const goToNotes = () => router.push("/notes");
-const goToTasks = () => router.push("/tasks");
 const logout = () => {
   authStore.logout();
   router.push("/login");
 };
+
+const goToNotes = () => router.push("/notes");
+const goToTasks = () => router.push("/tasks");
 const openProfile = () => router.push("/profile");
 const changeProfile = () => router.push("/profile/change");
 </script>

@@ -61,13 +61,20 @@ export const useAuthStore = defineStore("auth", () => {
         password,
       });
 
-      if (response.data.success) {
-        return true;
+      // if (response.data.success) {
+      //   return true;
+      // } else {
+      //   throw new Error(response.data.message || "Registration failed.");
+      // }
+      return true;
+    } 
+    catch (err) {
+      if (err.response?.status === 422) {
+        const errors = err.response.data.errors;
+        error.value = Object.values(errors).flat().join(" ");
       } else {
-        throw new Error(response.data.message || "Registration failed.");
+        error.value = err.response?.data?.message || "Failed to register.";
       }
-    } catch (err) {
-      error.value = err.response?.data?.message || "Failed to register.";
       return false;
     }
   };
