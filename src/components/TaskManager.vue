@@ -239,7 +239,7 @@ const addSubtask = async (parentId) => {
     return;
   }
   try {
-    await taskStore.createChildTask(title, "", parentId); // parentId is used for subtask
+    await taskStore.createTask(title, "", parentId); // parentId is used for subtask
     subtaskInputs.value[parentId] = "";
     await taskStore.fetchTasks();
   } catch (error) {
