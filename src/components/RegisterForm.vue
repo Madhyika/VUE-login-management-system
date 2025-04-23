@@ -34,19 +34,30 @@
         </div>
 
         <div class="mb-4">
-          <label for="password" class="block text-sm text-gray-700 mb-1"
-            >Password:</label
-          >
-          <input
-            v-model="password"
-            type="password"
-            id="password"
-            placeholder="Create a password"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
+          <label for="password" class="block text-sm text-gray-700 mb-1">
+            Password:
+          </label>
+          <div class="relative">
+            <input
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              id="password"
+              placeholder="Create a password"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$"
+              title="Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and a special character."
+              
+              required
+            />
+            <button
+              type="button"
+              @click="togglePassword"
+              class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+            >
+              <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+            </button>
+          </div>
         </div>
-
         <div class="mb-4 text-center">
           <span class="text-sm text-gray-600">
             Already have an account?
@@ -82,8 +93,12 @@ const router = useRouter();
 const name = ref("");
 const email = ref("");
 const password = ref("");
+const showPassword = ref(false);
 const errorMessage = ref("");
 const loading = ref(false);
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
 
 const handleRegister = async () => {
   errorMessage.value = "";

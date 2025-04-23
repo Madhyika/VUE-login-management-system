@@ -68,31 +68,73 @@
           <li
             v-for="(task, index) in tasks"
             :key="index"
-            class="flex justify-between items-center p-3 border-b border-gray-200"
+            class="p-3 border border-gray-200 rounded bg-gray-50"
           >
-            <span :class="{ 'line-through text-gray-500': task.done }">
-              {{ task.title }} - {{ task.content }}
-            </span>
-            <div class="space-x-2">
-              <button
-                @click="editTask(task)"
-                class="text-blue-600 hover:underline"
-              >
-                Edit
-              </button>
-              <button
-                @click="updateTask(task)"
-                class="text-green-600 hover:underline"
-              >
-                {{ task.done ? "Undo" : "Done" }}
-              </button>
-              <button
-                @click="deleteTask(task.id || task._id)"
-                class="text-red-600 hover:underline"
-              >
-                Delete
-              </button>
+            <div class="flex justify-between items-center">
+              <span :class="{ 'line-through text-gray-500': task.done }">
+                {{ task.title }} - {{ task.content }}
+              </span>
+              <div class="space-x-2">
+                <button
+                  @click="editTask(task)"
+                  class="text-blue-600 hover:underline"
+                >
+                  Edit
+                </button>
+                <button
+                  @click="updateTask(task)"
+                  class="text-green-600 hover:underline"
+                >
+                  {{ task.done ? "Undo" : "Done" }}
+                </button>
+                <button
+                  @click="deleteTask(task.id || task._id)"
+                  class="text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
+
+            <ul
+              v-if="task.subtasks?.length"
+              class="ml-4 mt-2 space-y-1 text-sm"
+            >
+              <li
+                v-for="sub in task.subtasks"
+                :key="sub.id"
+                class="flex justify-between items-center"
+              >
+                <span :class="{ 'line-through text-gray-500': sub.done }"
+                  >- {{ sub.title }}</span
+                >
+                <button
+                  @click="deleteTask(sub.id)"
+                  class="text-xs text-red-500 hover:underline"
+                >
+                  Delete
+                </button>
+              </li>
+            </ul>
+            
+            <form
+              v-if="!task.parent_task_id"
+              @submit.prevent="addSubtask(task.id)"
+              class="flex gap-2 mt-2 ml-4"
+            >
+              <input
+                v-model="subtaskInputs[task.id]"
+                type="text"
+                placeholder="Add subtask"
+                class="flex-1 px-2 py-1 border rounded text-sm"
+              />
+              <button
+                type="submit"
+                class="bg-purple-600 text-white px-3 py-1 text-sm rounded hover:bg-purple-700"
+              >
+                Add
+              </button>
+            </form>
           </li>
         </ul>
       </div>
@@ -114,6 +156,7 @@ const newTask = ref({ title: "", content: "" });
 const editTaskId = ref(null);
 const isEditing = ref(false);
 const loading = ref(false);
+const subtaskInputs = ref({});
 
 const tasks = computed(() => taskStore.tasks);
 const loggedInUser = computed(() => authStore.loggedInUser);
@@ -185,6 +228,24 @@ const deleteTask = async (id) => {
     console.error("Error deleting task:", error);
   }
 };
+const addSubtask = async (parentId) => {
+  const title = subtaskInputs.value[parentId];
+  // const title = subtaskInputs.value[parentId]?.trim();
+
+  if (!title) return;
+  const parentTask = tasks.value.find(t => t.id === parentId);
+  if (parentTask?.parent_id) {
+    console.warn("Subtasks cannot have subtasks");
+    return;
+  }
+  try {
+    await taskStore.createChildTask(title, "", parentId); // parentId is used for subtask
+    subtaskInputs.value[parentId] = "";
+    await taskStore.fetchTasks();
+  } catch (error) {
+    console.error("Error adding subtask:", error);
+  }
+};
 
 const goToNotes = () => router.push("/notes");
 const goToTasks = () => router.push("/tasks");
@@ -195,3 +256,4 @@ const logout = () => {
 const openProfile = () => router.push("/profile");
 const changeProfile = () => router.push("/profile/change");
 </script>
+

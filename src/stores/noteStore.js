@@ -49,7 +49,7 @@ export const useNoteStore = defineStore("note", () => {
   };
   const createChildNote = async (parentId, title, content) => {
     try {
-      await api.get("/sanctum/csrf-cookie");
+      // await api.get("/sanctum/csrf-cookie");
 
       const response = await api.post("/notes", {
         title,

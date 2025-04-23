@@ -7,7 +7,7 @@ export const useTaskStore = defineStore("task", () => {
   const error = ref(null);
 
   const fetchTasks = async () => {
-    try {
+    try { 
       const response = await api.get("/tasks/get");
       console.log("Fetched tasks:", response.data);
       tasks.value = response.data.data;
@@ -47,18 +47,20 @@ export const useTaskStore = defineStore("task", () => {
       error.value = "Failed to delete task";
     }
   };
-  const createChildTask = async (parentId, title, content) => {
+  
+  const createChildTask = async (parentId, title) => {
     try {
-      await api.get("/sanctum/csrf-cookie");
+      // await api.get("/sanctum/csrf-cookie");
 
-      const response = await api.post("/tasks", {
+      // const response = await api.post("/tasks", {
+        await api.post("/tasks", {
         title,
-        content,
         completed: false,
-        parent_id: parentId,
+        // parent_id: parentId,
+        parentId,
       });
-
-      return response.data.data;
+      await fetchTasks();
+      // return response.data.data;
     } catch (err) {
       console.error("Failed to create child task:", err);
       return null;

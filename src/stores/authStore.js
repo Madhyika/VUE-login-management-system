@@ -4,7 +4,7 @@ import api from "../api/api";
 import axios from "axios";
 
 axios.defaults.baseURL = "http://127.0.0.1:8000";
-axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = true;
 
 export const useAuthStore = defineStore("auth", () => {
   const token = ref(localStorage.getItem("token") || null);
@@ -16,8 +16,10 @@ export const useAuthStore = defineStore("auth", () => {
   watch(token, (newToken) => {
     if (newToken) {
       localStorage.setItem("token", newToken);
+      api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
     } else {
       localStorage.removeItem("token");
+      delete api.defaults.headers.common["Authorization"];
     }
   });
 
@@ -32,7 +34,7 @@ export const useAuthStore = defineStore("auth", () => {
   // Actions
   const login = async (login, password) => {
     try {
-      await axios.get("/sanctum/csrf-cookie");
+      // await axios.get("/sanctum/csrf-cookie");
 
       const response = await api.post("/login", { login, password });
 
@@ -53,22 +55,14 @@ export const useAuthStore = defineStore("auth", () => {
 
   const register = async (name, email, password) => {
     try {
-      await axios.get("/sanctum/csrf-cookie");
-
+      // await axios.get("/sanctum/csrf-cookie");
       const response = await api.post("/register", {
         name,
         email,
         password,
       });
-
-      // if (response.data.success) {
-      //   return true;
-      // } else {
-      //   throw new Error(response.data.message || "Registration failed.");
-      // }
       return true;
-    } 
-    catch (err) {
+    } catch (err) {
       if (err.response?.status === 422) {
         const errors = err.response.data.errors;
         error.value = Object.values(errors).flat().join(" ");
