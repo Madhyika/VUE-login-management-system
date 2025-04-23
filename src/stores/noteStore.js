@@ -31,7 +31,12 @@ export const useNoteStore = defineStore("note", () => {
       await api.put(`/notes/update/${id}`, { title, content, done });
       const noteIndex = notes.value.findIndex((note) => note.id === id);
       if (noteIndex !== -1) {
-        notes.value[noteIndex] = { ...notes.value[noteIndex], title, content, done };
+        notes.value[noteIndex] = {
+          ...notes.value[noteIndex],
+          title,
+          content,
+          done,
+        };
       }
     } catch (err) {
       error.value = "Failed to update note";
@@ -47,7 +52,7 @@ export const useNoteStore = defineStore("note", () => {
       error.value = "Failed to delete note";
     }
   };
-  const createChildNote = async (parentId, title, content) => {
+  const createChildNote = async (parent_id, title, content) => {
     try {
       // await api.get("/sanctum/csrf-cookie");
 
@@ -55,7 +60,7 @@ export const useNoteStore = defineStore("note", () => {
         title,
         content,
         completed: false,
-        parent_id: parentId,
+        parent_id,
       });
 
       return response.data.data;

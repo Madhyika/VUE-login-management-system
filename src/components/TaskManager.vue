@@ -97,11 +97,11 @@
             </div>
 
             <ul
-              v-if="task.subtasks?.length"
+              v-if="task.children?.length"
               class="ml-4 mt-2 space-y-1 text-sm"
             >
               <li
-                v-for="sub in task.subtasks"
+                v-for="sub in task.children"
                 :key="sub.id"
                 class="flex justify-between items-center"
               >
@@ -116,7 +116,7 @@
                 </button>
               </li>
             </ul>
-            
+
             <form
               v-if="!task.parent_task_id"
               @submit.prevent="addSubtask(task.id)"
@@ -228,23 +228,25 @@ const deleteTask = async (id) => {
     console.error("Error deleting task:", error);
   }
 };
-const addSubtask = async (parentId) => {
-  const title = subtaskInputs.value[parentId];
-  // const title = subtaskInputs.value[parentId]?.trim();
+const addSubtask = async (parent_id) => {
+  const title = subtaskInputs.value[parent_id];
+  // const title = subtaskInputs.value[parent_id]?.trim();
 
   if (!title) return;
-  const parentTask = tasks.value.find(t => t.id === parentId);
+  const parentTask = tasks.value.find(t => t.id === parent_id);
   if (parentTask?.parent_id) {
     console.warn("Subtasks cannot have subtasks");
     return;
   }
   try {
-    await taskStore.createTask(title, "", parentId); // parentId is used for subtask
-    subtaskInputs.value[parentId] = "";
+    await taskStore.createTask(title, "", parent_id); // parent_id is used for subtask
+    subtaskInputs.value[parent_id] = "";
     await taskStore.fetchTasks();
   } catch (error) {
     console.error("Error adding subtask:", error);
   }
+  // await taskStore.addSubtask(title, parent_id); 
+  // subtaskInputs.value[parent_id] = "";
 };
 
 const goToNotes = () => router.push("/notes");
@@ -256,4 +258,3 @@ const logout = () => {
 const openProfile = () => router.push("/profile");
 const changeProfile = () => router.push("/profile/change");
 </script>
-

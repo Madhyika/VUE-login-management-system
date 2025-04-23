@@ -7,7 +7,7 @@ export const useTaskStore = defineStore("task", () => {
   const error = ref(null);
 
   const fetchTasks = async () => {
-    try { 
+    try {
       const response = await api.get("/tasks/get");
       console.log("Fetched tasks:", response.data);
       tasks.value = response.data.data;
@@ -17,12 +17,21 @@ export const useTaskStore = defineStore("task", () => {
     }
   };
 
-  const createTask = async (title, content) => {
+  const createTask = async (title, content, parent_id = null) => {
     try {
-      await api.post("/tasks/create", { title, content });
+      await api.post("/tasks/create", { title, content, parent_id, done:false });
       await fetchTasks();
     } catch (err) {
       error.value = "Failed to create task";
+    }
+  };
+  const addSubtask = async (parent_id, title) => {
+    try {
+      await api.post("/tasks/create", { title, completed: false, parent_id }); //parent_id: parentId
+      await fetchTasks();
+    } catch (err) {
+      console.error("Failed to create child task:", err);
+      return null;
     }
   };
 
@@ -31,7 +40,12 @@ export const useTaskStore = defineStore("task", () => {
       await api.put(`/tasks/update/${id}`, { title, content, done });
       const taskIndex = tasks.value.findIndex((task) => task.id === id);
       if (taskIndex !== -1) {
-        tasks.value[taskIndex] = { ...tasks.value[taskIndex], title, content, done };
+        tasks.value[taskIndex] = {
+          ...tasks.value[taskIndex],
+          title,
+          content,
+          done,
+        };
       }
     } catch (err) {
       error.value = "Failed to update task";
@@ -47,25 +61,6 @@ export const useTaskStore = defineStore("task", () => {
       error.value = "Failed to delete task";
     }
   };
-  
-  const createChildTask = async (parentId, title) => {
-    try {
-      // await api.get("/sanctum/csrf-cookie");
-
-      // const response = await api.post("/tasks", {
-        await api.post("/tasks", {
-        title,
-        completed: false,
-        // parent_id: parentId,
-        parentId,
-      });
-      await fetchTasks();
-      // return response.data.data;
-    } catch (err) {
-      console.error("Failed to create child task:", err);
-      return null;
-    }
-  };
 
   return {
     tasks,
@@ -74,6 +69,6 @@ export const useTaskStore = defineStore("task", () => {
     createTask,
     updateTask,
     deleteTask,
-    createChildTask,
+    addSubtask,
   };
 });
