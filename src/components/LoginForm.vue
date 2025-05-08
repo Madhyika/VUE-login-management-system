@@ -44,14 +44,14 @@
         <div class="mb-4">
           <span class="mt-4 text-sm text-gray-600 text-center">
             Don't have an account?
-            <router-link to="/register" class="text-purple-600 hover:underline">
+            <router-link to="/register" class="text-indigo-900 font-semibold hover:underline">
               Register
             </router-link>
           </span>
         </div>
         <button
           type="submit"
-          class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          class="w-full bg-indigo-900 text-white py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
           :disabled="loading"
         >
           {{ loading ? "Logging in..." : "Login" }}

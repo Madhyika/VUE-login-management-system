@@ -14,7 +14,7 @@
             type="text"
             id="name"
             placeholder="Enter your username"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
         </div>
@@ -28,7 +28,7 @@
             type="email"
             id="email"
             placeholder="Enter your email"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
         </div>
@@ -43,7 +43,7 @@
               :type="showPassword ? 'text' : 'password'"
               id="password"
               placeholder="Create a password"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$"
               title="Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and a special character."
               
@@ -61,7 +61,7 @@
         <div class="mb-4 text-center">
           <span class="text-sm text-gray-600">
             Already have an account?
-            <router-link to="/login" class="text-purple-600 hover:underline"
+            <router-link to="/login" class="text-indigo-900 font-semibold hover:underline"
               >Login</router-link
             >
           </span>
@@ -69,7 +69,7 @@
 
         <button
           type="submit"
-          class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          class="w-full bg-indigo-900 text-white py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           :disabled="loading"
         >
           {{ loading ? "Registering..." : "Register" }}
